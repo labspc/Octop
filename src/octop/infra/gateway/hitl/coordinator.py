@@ -261,9 +261,12 @@ def decision_rejection_reason(
                 f"'{action.get('name')}' (allowed: {', '.join(sorted(allowed))})"
             )
         if action.get("name") == STRUCTURED_FORM_TOOL_NAME:
-            request_error = validate_structured_form_request(action.get("args"))
-            if request_error:
-                return request_error
+            # Reject is allowed to dismiss the form even when the Agent
+            # generated an invalid request; only validate on respond / cancel.
+            if kind != "reject":
+                request_error = validate_structured_form_request(action.get("args"))
+                if request_error:
+                    return request_error
             # Timeout: expire the form when timeout_seconds has elapsed.
             args = action.get("args") or {}
             timeout = args.get("timeout_seconds")

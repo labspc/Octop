@@ -18,6 +18,8 @@ if TYPE_CHECKING:
 HitlSessionMode = Literal["ask", "allow_all", "allow_tools"]
 
 _ASK_USER_TOOL_NAME = "ask_user_question"
+# Structured form requires explicit user interaction — never bypass.
+_STRUCTURED_FORM_TOOL_NAME = "request_structured_form"
 _MAX_TOOLS = 64
 _MAX_TOOL_NAME = 128
 _CURRENT_HITL_THREAD: ContextVar[str | None] = ContextVar(
@@ -52,7 +54,7 @@ class HitlSessionPolicy:
     tools: tuple[str, ...] = ()
 
     def allows(self, tool_name: str) -> bool:
-        if not tool_name or tool_name == _ASK_USER_TOOL_NAME:
+        if not tool_name or tool_name in (_ASK_USER_TOOL_NAME, _STRUCTURED_FORM_TOOL_NAME):
             return False
         if self.mode == "allow_all":
             return True
